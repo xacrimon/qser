@@ -1,7 +1,7 @@
-use std::collections::BTreeMap;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::hash::{BuildHasher, Hash};
-use std::{mem, str::FromStr};
+use std::mem;
+use std::str::FromStr;
 
 use crate::Place;
 use crate::de::{Deserialize, Map, Seq, Visitor};

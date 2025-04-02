@@ -1,9 +1,10 @@
-use crate::{attr, bound};
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::{
     Data, DataEnum, DataStruct, DeriveInput, Error, Fields, FieldsNamed, Ident, Result, parse_quote,
 };
+
+use crate::{attr, bound};
 
 pub fn derive(input: DeriveInput) -> Result<TokenStream> {
     match &input.data {
