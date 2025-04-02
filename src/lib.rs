@@ -200,7 +200,7 @@ mod lib {
 }
 
 #[doc(hidden)]
-pub use qser_derive::{Serialize, Deserialize};
+pub use qser_derive::{Deserialize, Serialize};
 
 // Not public API.
 #[doc(hidden)]
