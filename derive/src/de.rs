@@ -37,7 +37,7 @@ pub fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenS
 
     let wrapper_generics = bound::with_lifetime_bound(&input.generics, "'__a");
     let (wrapper_impl_generics, wrapper_ty_generics, _) = wrapper_generics.split_for_impl();
-    let bound = parse_quote!(microserde::Deserialize);
+    let bound = parse_quote!(qser::Deserialize);
     let bounded_where_clause = bound::where_clause_with_bound(&input.generics, bound);
 
     Ok(quote! {
@@ -45,26 +45,26 @@ pub fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenS
         const #dummy: () = {
             #[repr(C)]
             struct __Visitor #impl_generics #where_clause {
-                __out: microserde::export::Option<#ident #ty_generics>,
+                __out: qser::export::Option<#ident #ty_generics>,
             }
 
-            impl #impl_generics microserde::Deserialize for #ident #ty_generics #bounded_where_clause {
-                fn begin(__out: &mut microserde::export::Option<Self>) -> &mut dyn microserde::de::Visitor {
+            impl #impl_generics qser::Deserialize for #ident #ty_generics #bounded_where_clause {
+                fn begin(__out: &mut qser::export::Option<Self>) -> &mut dyn qser::de::Visitor {
                     unsafe {
                         &mut *{
                             __out
-                            as *mut microserde::export::Option<Self>
+                            as *mut qser::export::Option<Self>
                             as *mut __Visitor #ty_generics
                         }
                     }
                 }
             }
 
-            impl #impl_generics microserde::de::Visitor for __Visitor #ty_generics #bounded_where_clause {
-                fn map(&mut self) -> microserde::Result<microserde::export::Box<dyn microserde::de::Map + '_>> {
-                    Ok(microserde::export::Box::new(__State {
+            impl #impl_generics qser::de::Visitor for __Visitor #ty_generics #bounded_where_clause {
+                fn map(&mut self) -> qser::Result<qser::export::Box<dyn qser::de::Map + '_>> {
+                    Ok(qser::export::Box::new(__State {
                         #(
-                            #fieldname: microserde::Deserialize::default(),
+                            #fieldname: qser::Deserialize::default(),
                         )*
                         __out: &mut self.__out,
                     }))
@@ -73,31 +73,31 @@ pub fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenS
 
             struct __State #wrapper_impl_generics #where_clause {
                 #(
-                    #fieldname: microserde::export::Option<#fieldty>,
+                    #fieldname: qser::export::Option<#fieldty>,
                 )*
-                __out: &'__a mut microserde::export::Option<#ident #ty_generics>,
+                __out: &'__a mut qser::export::Option<#ident #ty_generics>,
             }
 
-            impl #wrapper_impl_generics microserde::de::Map for __State #wrapper_ty_generics #bounded_where_clause {
-                fn key(&mut self, __k: &microserde::export::str) -> microserde::Result<&mut dyn microserde::de::Visitor> {
+            impl #wrapper_impl_generics qser::de::Map for __State #wrapper_ty_generics #bounded_where_clause {
+                fn key(&mut self, __k: &qser::export::str) -> qser::Result<&mut dyn qser::de::Visitor> {
                     match __k {
                         #(
-                            #fieldstr => microserde::export::Ok(microserde::Deserialize::begin(&mut self.#fieldname)),
+                            #fieldstr => qser::export::Ok(qser::Deserialize::begin(&mut self.#fieldname)),
                         )*
-                        _ => microserde::export::Ok(microserde::de::Visitor::ignore()),
+                        _ => qser::export::Ok(qser::de::Visitor::ignore()),
                     }
                 }
 
-                fn finish(&mut self) -> microserde::Result<()> {
+                fn finish(&mut self) -> qser::Result<()> {
                     #(
-                        let #fieldname = self.#fieldname.take().ok_or(microserde::Error)?;
+                        let #fieldname = self.#fieldname.take().ok_or(qser::Error)?;
                     )*
-                    *self.__out = microserde::export::Some(#ident {
+                    *self.__out = qser::export::Some(#ident {
                         #(
                             #fieldname,
                         )*
                     });
-                    microserde::export::Ok(())
+                    qser::export::Ok(())
                 }
             }
         };
@@ -140,29 +140,29 @@ pub fn derive_enum(input: &DeriveInput, enumeration: &DataEnum) -> Result<TokenS
         const #dummy: () = {
             #[repr(C)]
             struct __Visitor {
-                __out: microserde::export::Option<#ident>,
+                __out: qser::export::Option<#ident>,
             }
 
-            impl microserde::Deserialize for #ident {
-                fn begin(__out: &mut microserde::export::Option<Self>) -> &mut dyn microserde::de::Visitor {
+            impl qser::Deserialize for #ident {
+                fn begin(__out: &mut qser::export::Option<Self>) -> &mut dyn qser::de::Visitor {
                     unsafe {
                         &mut *{
                             __out
-                            as *mut microserde::export::Option<Self>
+                            as *mut qser::export::Option<Self>
                             as *mut __Visitor
                         }
                     }
                 }
             }
 
-            impl microserde::de::Visitor for __Visitor {
-                fn string(&mut self, s: &microserde::export::str) -> microserde::Result<()> {
+            impl qser::de::Visitor for __Visitor {
+                fn string(&mut self, s: &qser::export::str) -> qser::Result<()> {
                     let value = match s {
                         #( #names => #ident::#var_idents, )*
-                        _ => { return microserde::export::Err(microserde::Error) },
+                        _ => { return qser::export::Err(qser::Error) },
                     };
-                    self.__out = microserde::export::Some(value);
-                    microserde::export::Ok(())
+                    self.__out = qser::export::Some(value);
+                    qser::export::Ok(())
                 }
             }
         };

@@ -37,15 +37,15 @@ fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenStrea
 
     let wrapper_generics = bound::with_lifetime_bound(&input.generics, "'__a");
     let (wrapper_impl_generics, wrapper_ty_generics, _) = wrapper_generics.split_for_impl();
-    let bound = parse_quote!(microserde::Serialize);
+    let bound = parse_quote!(qser::Serialize);
     let bounded_where_clause = bound::where_clause_with_bound(&input.generics, bound);
 
     Ok(quote! {
         #[allow(non_upper_case_globals)]
         const #dummy: () = {
-            impl #impl_generics microserde::Serialize for #ident #ty_generics #bounded_where_clause {
-                fn begin(&self) -> microserde::ser::Fragment {
-                    microserde::ser::Fragment::Map(microserde::export::Box::new(__Map {
+            impl #impl_generics qser::Serialize for #ident #ty_generics #bounded_where_clause {
+                fn begin(&self) -> qser::ser::Fragment {
+                    qser::ser::Fragment::Map(qser::export::Box::new(__Map {
                         data: self,
                         state: 0,
                     }))
@@ -54,21 +54,21 @@ fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenStrea
 
             struct __Map #wrapper_impl_generics #where_clause {
                 data: &'__a #ident #ty_generics,
-                state: microserde::export::usize,
+                state: qser::export::usize,
             }
 
-            impl #wrapper_impl_generics microserde::ser::Map for __Map #wrapper_ty_generics #bounded_where_clause {
-                fn next(&mut self) -> microserde::export::Option<(microserde::export::Cow<microserde::export::str>, &dyn microserde::Serialize)> {
+            impl #wrapper_impl_generics qser::ser::Map for __Map #wrapper_ty_generics #bounded_where_clause {
+                fn next(&mut self) -> qser::export::Option<(qser::export::Cow<qser::export::str>, &dyn qser::Serialize)> {
                     let __state = self.state;
                     self.state = __state + 1;
                     match __state {
                         #(
-                            #index => microserde::export::Some((
-                                microserde::export::Cow::Borrowed(#fieldstr),
+                            #index => qser::export::Some((
+                                qser::export::Cow::Borrowed(#fieldstr),
                                 &self.data.#fieldname,
                             )),
                         )*
-                        _ => microserde::export::None,
+                        _ => qser::export::None,
                     }
                 }
             }
@@ -110,12 +110,12 @@ fn derive_enum(input: &DeriveInput, enumeration: &DataEnum) -> Result<TokenStrea
     Ok(quote! {
         #[allow(non_upper_case_globals)]
         const #dummy: () = {
-            impl microserde::Serialize for #ident {
-                fn begin(&self) -> microserde::ser::Fragment {
+            impl qser::Serialize for #ident {
+                fn begin(&self) -> qser::ser::Fragment {
                     match self {
                         #(
                             #ident::#var_idents => {
-                                microserde::ser::Fragment::Str(microserde::export::Cow::Borrowed(#names))
+                                qser::ser::Fragment::Str(qser::export::Cow::Borrowed(#names))
                             }
                         )*
                     }

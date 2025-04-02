@@ -1,6 +1,6 @@
 //! Deserialization traits.
 //!
-//! Deserialization in microserde works by returning a "place" into which data
+//! Deserialization in qser works by returning a "place" into which data
 //! may be written through the methods of the `Visitor` trait object.
 //!
 //! Use the `make_place!` macro to acquire a "place" type. A library may use a
@@ -24,8 +24,8 @@
 //! type.
 //!
 //! ```rust
-//! use microserde::{make_place, Result};
-//! use microserde::de::{Deserialize, Visitor};
+//! use qser::{make_place, Result};
+//! use qser::de::{Deserialize, Visitor};
 //!
 //! make_place!(Place);
 //!
@@ -59,8 +59,8 @@
 //! that can hand out places to write sequence elements one element at a time.
 //!
 //! ```rust
-//! use microserde::{make_place, Result};
-//! use microserde::de::{Deserialize, Seq, Visitor};
+//! use qser::{make_place, Result};
+//! use qser::de::{Deserialize, Seq, Visitor};
 //! use std::mem;
 //!
 //! make_place!(Place);
@@ -119,8 +119,8 @@
 //! `#[derive(Deserialize)]`.
 //!
 //! ```rust
-//! use microserde::{make_place, Result};
-//! use microserde::de::{Deserialize, Map, Visitor};
+//! use qser::{make_place, Result};
+//! use qser::de::{Deserialize, Map, Visitor};
 //!
 //! make_place!(Place);
 //!
@@ -160,15 +160,15 @@
 //!         match k {
 //!             "code" => Ok(Deserialize::begin(&mut self.code)),
 //!             "message" => Ok(Deserialize::begin(&mut self.message)),
-//!             _ => Ok(Visitor::ignore()),
+//!             _ => Ok(<dyn Visitor>::ignore()),
 //!         }
 //!     }
 //!
 //!     fn finish(&mut self) -> Result<()> {
 //!         // Make sure we have every field and then write the output object
 //!         // into self.out.
-//!         let code = self.code.take().ok_or(microserde::Error)?;
-//!         let message = self.message.take().ok_or(microserde::Error)?;
+//!         let code = self.code.take().ok_or(qser::Error)?;
+//!         let message = self.message.take().ok_or(qser::Error)?;
 //!         *self.out = Some(Demo { code, message });
 //!         Ok(())
 //!     }
@@ -194,8 +194,8 @@ pub trait Deserialize: Sized {
     /// The only correct implementation of this method is:
     ///
     /// ```rust
-    /// # use microserde::make_place;
-    /// # use microserde::de::{Deserialize, Visitor};
+    /// # use qser::make_place;
+    /// # use qser::de::{Deserialize, Visitor};
     /// #
     /// # make_place!(Place);
     /// # struct S;

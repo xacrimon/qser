@@ -4,7 +4,7 @@ use crate::ser::{Fragment, Map, Seq, Serialize};
 /// Serialize any serializable type into a JSON string.
 ///
 /// ```rust
-/// use microserde::{json, Serialize};
+/// use qser::{json, Serialize};
 ///
 /// #[derive(Serialize, Debug)]
 /// struct Example {

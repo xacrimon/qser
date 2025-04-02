@@ -12,6 +12,7 @@ use crate::error::{Error, Result};
 
 impl Deserialize for () {
     fn begin(out: &mut Option<Self>) -> &mut dyn Visitor {
+        #[allow(non_local_definitions)]
         impl Visitor for Place<()> {
             fn null(&mut self) -> Result<()> {
                 self.out = Some(());
@@ -24,6 +25,7 @@ impl Deserialize for () {
 
 impl Deserialize for bool {
     fn begin(out: &mut Option<Self>) -> &mut dyn Visitor {
+        #[allow(non_local_definitions)]
         impl Visitor for Place<bool> {
             fn boolean(&mut self, b: bool) -> Result<()> {
                 self.out = Some(b);
@@ -36,6 +38,7 @@ impl Deserialize for bool {
 
 impl Deserialize for String {
     fn begin(out: &mut Option<Self>) -> &mut dyn Visitor {
+        #[allow(non_local_definitions)]
         impl Visitor for Place<String> {
             fn string(&mut self, s: &str) -> Result<()> {
                 self.out = Some(s.to_owned());
@@ -50,6 +53,7 @@ macro_rules! signed {
     ($ty:ident) => {
         impl Deserialize for $ty {
             fn begin(out: &mut Option<Self>) -> &mut dyn Visitor {
+                #[allow(non_local_definitions)]
                 impl Visitor for Place<$ty> {
                     fn negative(&mut self, n: i64) -> Result<()> {
                         if n >= $ty::min_value() as i64 {
@@ -84,6 +88,7 @@ macro_rules! unsigned {
     ($ty:ident) => {
         impl Deserialize for $ty {
             fn begin(out: &mut Option<Self>) -> &mut dyn Visitor {
+                #[allow(non_local_definitions)]
                 impl Visitor for Place<$ty> {
                     fn nonnegative(&mut self, n: u64) -> Result<()> {
                         if n <= $ty::max_value() as u64 {
@@ -108,6 +113,7 @@ unsigned!(usize);
 macro_rules! float {
     ($ty:ident) => {
         impl Deserialize for $ty {
+            #[allow(non_local_definitions)]
             fn begin(out: &mut Option<Self>) -> &mut dyn Visitor {
                 impl Visitor for Place<$ty> {
                     fn negative(&mut self, n: i64) -> Result<()> {
@@ -135,6 +141,7 @@ float!(f64);
 
 impl<T: Deserialize> Deserialize for Box<T> {
     fn begin(out: &mut Option<Self>) -> &mut dyn Visitor {
+        #[allow(non_local_definitions)]
         impl<T: Deserialize> Visitor for Place<Box<T>> {
             fn null(&mut self) -> Result<()> {
                 let mut out = None;
@@ -245,6 +252,7 @@ impl<T: Deserialize> Deserialize for Option<T> {
         Some(None)
     }
     fn begin(out: &mut Option<Self>) -> &mut dyn Visitor {
+        #[allow(non_local_definitions)]
         impl<T: Deserialize> Visitor for Place<Option<T>> {
             fn null(&mut self) -> Result<()> {
                 self.out = Some(None);
@@ -293,6 +301,7 @@ impl<T: Deserialize> Deserialize for Option<T> {
 
 impl<A: Deserialize, B: Deserialize> Deserialize for (A, B) {
     fn begin(out: &mut Option<Self>) -> &mut dyn Visitor {
+        #[allow(non_local_definitions)]
         impl<A: Deserialize, B: Deserialize> Visitor for Place<(A, B)> {
             fn seq(&mut self) -> Result<Box<dyn Seq + '_>> {
                 Ok(Box::new(TupleBuilder {
@@ -334,6 +343,7 @@ impl<A: Deserialize, B: Deserialize> Deserialize for (A, B) {
 
 impl<T: Deserialize> Deserialize for Vec<T> {
     fn begin(out: &mut Option<Self>) -> &mut dyn Visitor {
+        #[allow(non_local_definitions)]
         impl<T: Deserialize> Visitor for Place<Vec<T>> {
             fn seq(&mut self) -> Result<Box<dyn Seq + '_>> {
                 Ok(Box::new(VecBuilder {
@@ -383,6 +393,7 @@ where
     H: BuildHasher + Default,
 {
     fn begin(out: &mut Option<Self>) -> &mut dyn Visitor {
+        #[allow(non_local_definitions)]
         impl<K, V, H> Visitor for Place<HashMap<K, V, H>>
         where
             K: FromStr + Hash + Eq,
@@ -443,6 +454,7 @@ where
 
 impl<K: FromStr + Ord, V: Deserialize> Deserialize for BTreeMap<K, V> {
     fn begin(out: &mut Option<Self>) -> &mut dyn Visitor {
+        #[allow(non_local_definitions)]
         impl<K: FromStr + Ord, V: Deserialize> Visitor for Place<BTreeMap<K, V>> {
             fn map(&mut self) -> Result<Box<dyn Map + '_>> {
                 Ok(Box::new(MapBuilder {

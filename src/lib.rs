@@ -9,7 +9,7 @@
 //! # Example
 //!
 //! ```rust
-//! use microserde::{json, Serialize, Deserialize};
+//! use qser::{json, Serialize, Deserialize};
 //!
 //! #[derive(Serialize, Deserialize, Debug)]
 //! struct Example {
@@ -17,7 +17,7 @@
 //!     message: String,
 //! }
 //!
-//! fn main() -> microserde::Result<()> {
+//! fn main() -> qser::Result<()> {
 //!     let example = Example {
 //!         code: 200,
 //!         message: "reminiscent of Serde".to_owned(),
@@ -81,7 +81,7 @@
 //! you overflow the stack. Some formats set a cap on nesting depth to prevent
 //! stack overflows and just refuse to deserialize deeply nested data.
 //!
-//! In microserde neither serialization nor deserialization involves recursion.
+//! In qser neither serialization nor deserialization involves recursion.
 //! You can safely process arbitrarily nested data without being exposed to
 //! stack overflows. Not even the Drop impl of our json `Value` type is
 //! recursive so you can safely nest them arbitrarily.
@@ -111,7 +111,7 @@
 //!
 //! ## <font color="#C0C0C0">Different:</font> Structs only
 //!
-//! The microserde derive macros will refuse anything other than a braced struct
+//! The qser derive macros will refuse anything other than a braced struct
 //! with named fields. Enums and tuple structs are not supported.
 //!
 //! ## <font color="#C0C0C0">Different:</font> No customization
@@ -121,11 +121,11 @@
 //! configurability you can handwrite arbitrarily complicated implementations of
 //! its traits.
 //!
-//! Microserde provides just one attribute which is `rename`, and severely
+//! qser provides just one attribute which is `rename`, and severely
 //! restricts the kinds of on-the-fly manipulation that are possible in custom
 //! impls. If you need any of this, use Serde -- it's a great library.
 
-#![doc(html_root_url = "https://docs.rs/microserde/0.1.13")]
+#![doc(html_root_url = "https://docs.rs/qser/0.1.13")]
 #![allow(
     clippy::needless_doctest_main,
     // Regression causing false positives:
@@ -164,17 +164,14 @@ mod lib {
         pub use std::*;
     }
 
-    pub use self::core::cell::{Cell, RefCell};
-    pub use self::core::clone::{self, Clone};
-    pub use self::core::convert::{self, From, Into};
-    pub use self::core::default::{self, Default};
-    pub use self::core::fmt::{self, Debug, Display};
-    pub use self::core::hash::{self, Hash};
-    pub use self::core::iter::FusedIterator;
-    pub use self::core::marker::{self, PhantomData};
-    pub use self::core::ops::{Bound, RangeBounds};
-    pub use self::core::result::{self, Result};
-    pub use self::core::{borrow, char, cmp, iter, mem, num, ops, slice, str};
+    pub use self::core::clone::Clone;
+
+    pub use self::core::default::Default;
+    pub use self::core::fmt::Debug;
+    pub use self::core::hash::{self};
+
+    pub use self::core::result::{self};
+    pub use self::core::{char, iter, mem, ops, slice, str};
 
     #[cfg(not(feature = "std"))]
     pub use alloc::borrow::{Cow, ToOwned};
@@ -187,9 +184,9 @@ mod lib {
     pub use std::string::{String, ToString};
 
     #[cfg(not(feature = "std"))]
-    pub use alloc::vec::{self, Vec};
+    pub use alloc::vec::Vec;
     #[cfg(feature = "std")]
-    pub use std::vec::{self, Vec};
+    pub use std::vec::Vec;
 
     #[cfg(not(feature = "std"))]
     pub use alloc::boxed::Box;
@@ -200,13 +197,10 @@ mod lib {
     pub use alloc::collections::{BTreeMap, btree_map};
     #[cfg(feature = "std")]
     pub use std::collections::{BTreeMap, btree_map};
-
-    #[cfg(feature = "std")]
-    pub use std::error;
 }
 
 #[doc(hidden)]
-pub use qser_derive::*;
+pub use qser_derive::{Serialize, Deserialize};
 
 // Not public API.
 #[doc(hidden)]

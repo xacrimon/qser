@@ -13,7 +13,7 @@ use crate::ser::{Fragment, Serialize};
 /// arbitrarily deeply nested instances.
 ///
 /// ```rust
-/// use microserde::json::{Array, Value};
+/// use qser::json::{Array, Value};
 ///
 /// let mut value = Value::Null;
 /// for _ in 0..100000 {
@@ -57,6 +57,7 @@ impl Serialize for Value {
 
 impl Deserialize for Value {
     fn begin(out: &mut Option<Self>) -> &mut dyn Visitor {
+        #[allow(non_local_definitions)]
         impl Visitor for Place<Value> {
             fn null(&mut self) -> Result<()> {
                 self.out = Some(Value::Null);
