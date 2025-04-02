@@ -1,3 +1,5 @@
+use std::default::Default;
+
 use anyhow::{Error, Result};
 
 // https://serde.rs/attributes.html
@@ -137,6 +139,8 @@ enum Modifier {
     },
 }
 
+// ----------------------------------------------------------
+
 enum TagStyle {
     External,
     Internal { field: String },
@@ -144,7 +148,7 @@ enum TagStyle {
     Untagged,
 }
 
-struct Default {
+struct DefaultValue {
     on: bool,
     path: Option<String>,
 }
@@ -161,11 +165,19 @@ struct With {
     deserialize_fn: Option<String>,
 }
 
+// ----------------------------------------------------------
+
+trait OptionSet {
+    fn apply_modifiers(&mut self, modifiers: &[Modifier]) -> Result<()>;
+}
+
+// ----------------------------------------------------------
+
 struct ContainerOpts {
     rename: Option<String>,
     rename_all: Option<String>,
     tag_style: TagStyle,
-    default: Default,
+    default: DefaultValue,
     remote: Option<String>,
     transparent: bool,
     from: Option<String>,
@@ -173,10 +185,14 @@ struct ContainerOpts {
     into: Option<String>,
 }
 
-impl TryFrom<Vec<Modifier>> for ContainerOpts {
-    type Error = Error;
+impl Default for ContainerOpts {
+    fn default() -> Self {
+        todo!()
+    }
+}
 
-    fn try_from(_modifiers: Vec<Modifier>) -> Result<Self> {
+impl OptionSet for ContainerOpts {
+    fn apply_modifiers(&mut self, modifiers: &[Modifier]) -> Result<()> {
         todo!()
     }
 }
@@ -190,26 +206,34 @@ struct VariantOpts {
     untagged: bool,
 }
 
-impl TryFrom<Vec<Modifier>> for VariantOpts {
-    type Error = Error;
+impl Default for VariantOpts {
+    fn default() -> Self {
+        todo!()
+    }
+}
 
-    fn try_from(_modifiers: Vec<Modifier>) -> Result<Self> {
+impl OptionSet for VariantOpts {
+    fn apply_modifiers(&mut self, modifiers: &[Modifier]) -> Result<()> {
         todo!()
     }
 }
 
 struct FieldOpts {
     rename: Option<String>,
-    default: Default,
+    default: DefaultValue,
     flatten: bool,
     skip: Skip,
     with: With,
 }
 
-impl TryFrom<Vec<Modifier>> for FieldOpts {
-    type Error = Error;
+impl Default for FieldOpts {
+    fn default() -> Self {
+        todo!()
+    }
+}
 
-    fn try_from(_modifiers: Vec<Modifier>) -> Result<Self> {
+impl OptionSet for FieldOpts {
+    fn apply_modifiers(&mut self, modifiers: &[Modifier]) -> Result<()> {
         todo!()
     }
 }
