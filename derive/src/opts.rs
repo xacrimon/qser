@@ -6,17 +6,20 @@ use anyhow::{Error, Result};
 enum Modifier {
     // #[serde(rename = "name")]
     Rename {
-        name: String,
+        serialize_name: Option<String>,
+        deserialize_name: Option<String>,
     },
 
     // #[serde(rename_all = "...")]
     RenameAll {
-        case: String,
+        serialize_case: Option<String>,
+        deserialize_case: Option<String>,
     },
 
     // #[serde(rename_all_fields = "...")]
-    RenameAllFeilds {
-        case: String,
+    RenameAllFields {
+        serialize_case: Option<String>,
+        deserialize_case: Option<String>,
     },
 
     // #[serde(deny_unknown_fields)]
@@ -141,6 +144,17 @@ enum Modifier {
 
 // ----------------------------------------------------------
 
+enum Case {
+    Lowercase,
+    Uppercase,
+    PascalCase,
+    CamelCase,
+    SnakeCase,
+    ScreamingSnakeCase,
+    KebabCase,
+    ScreamingKebabCase,
+}
+
 enum TagStyle {
     External,
     Internal { field: String },
@@ -153,16 +167,45 @@ struct DefaultValue {
     path: Option<String>,
 }
 
+impl Default for DefaultValue {
+    fn default() -> Self {
+        Self {
+            on: false,
+            path: None,
+        }
+    }
+}
+
 struct Skip {
     serializing: bool,
     serializing_if: Option<String>,
     deserializing: bool,
 }
 
+impl Default for Skip {
+    fn default() -> Self {
+        Self {
+            serializing: false,
+            serializing_if: None,
+            deserializing: false,
+        }
+    }
+}
+
 struct With {
     module: Option<String>,
     serialize_fn: Option<String>,
     deserialize_fn: Option<String>,
+}
+
+impl Default for With {
+    fn default() -> Self {
+        Self {
+            module: None,
+            serialize_fn: None,
+            deserialize_fn: None,
+        }
+    }
 }
 
 // ----------------------------------------------------------
@@ -175,7 +218,7 @@ trait OptionSet {
 
 struct ContainerOpts {
     rename: Option<String>,
-    rename_all: Option<String>,
+    rename_all: Option<Case>,
     tag_style: TagStyle,
     default: DefaultValue,
     remote: Option<String>,
@@ -187,7 +230,17 @@ struct ContainerOpts {
 
 impl Default for ContainerOpts {
     fn default() -> Self {
-        todo!()
+        Self {
+            rename: None,
+            rename_all: None,
+            tag_style: TagStyle::External,
+            default: DefaultValue::default(),
+            remote: None,
+            transparent: false,
+            from: None,
+            try_from: None,
+            into: None,
+        }
     }
 }
 
@@ -197,9 +250,11 @@ impl OptionSet for ContainerOpts {
     }
 }
 
+// ----------------------------------------------------------
+
 struct VariantOpts {
     rename: Option<String>,
-    rename_all: Option<String>,
+    rename_all: Option<Case>,
     skip: Skip,
     with: With,
     other: bool,
@@ -208,7 +263,14 @@ struct VariantOpts {
 
 impl Default for VariantOpts {
     fn default() -> Self {
-        todo!()
+        Self {
+            rename: None,
+            rename_all: None,
+            skip: Skip::default(),
+            with: With::default(),
+            other: false,
+            untagged: false,
+        }
     }
 }
 
@@ -217,6 +279,8 @@ impl OptionSet for VariantOpts {
         todo!()
     }
 }
+
+// ----------------------------------------------------------
 
 struct FieldOpts {
     rename: Option<String>,
@@ -228,7 +292,13 @@ struct FieldOpts {
 
 impl Default for FieldOpts {
     fn default() -> Self {
-        todo!()
+        Self {
+            rename: None,
+            default: DefaultValue::default(),
+            flatten: false,
+            skip: Skip::default(),
+            with: With::default(),
+        }
     }
 }
 
