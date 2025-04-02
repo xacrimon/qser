@@ -247,7 +247,6 @@ impl<T: Deserialize> Deserialize for Box<T> {
 }
 
 impl<T: Deserialize> Deserialize for Option<T> {
-    #[inline]
     fn default() -> Option<Self> {
         Some(None)
     }

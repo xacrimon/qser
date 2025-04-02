@@ -212,7 +212,6 @@ pub trait Deserialize: Sized {
     // Not public API. This method is only intended for Option<T>, should not
     // need to be implemented outside of this crate.
     #[doc(hidden)]
-    #[inline]
     fn default() -> Option<Self> {
         None
     }
