@@ -44,6 +44,7 @@ impl<'a> Drop for Serializer<'a> {
     }
 }
 
+#[inline(never)]
 fn to_string_impl(value: &dyn Serialize) -> String {
     let mut out = String::new();
     let mut serializer = Serializer { stack: Vec::new() };

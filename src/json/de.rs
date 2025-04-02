@@ -54,6 +54,7 @@ impl<'a, 'b> Drop for Deserializer<'a, 'b> {
     }
 }
 
+#[inline(never)]
 fn from_str_impl(j: &str, mut visitor: &mut dyn Visitor) -> Result<()> {
     let mut de = Deserializer {
         input: j.as_bytes(),
