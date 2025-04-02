@@ -309,7 +309,6 @@ dependencies = [
  "qser-derive",
  "ryu",
  "serde",
- "serde_derive",
  "serde_json",
 ]
 

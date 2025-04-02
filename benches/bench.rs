@@ -2,7 +2,7 @@
 
 use criterion::{Bencher, Criterion, criterion_group, criterion_main};
 use qser::{Deserialize as MiniDeserialize, Serialize as MiniSerialize};
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 criterion_group!(benches, criterion_benchmark);
 criterion_main!(benches);
