@@ -4,8 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
-default = ["std", "derive"]
-std = []
+default = ["derive"]
 derive = ["dep:qser-derive"]
 
 [dependencies]

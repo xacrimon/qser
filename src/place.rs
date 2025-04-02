@@ -27,12 +27,12 @@ macro_rules! make_place {
     ($name:ident) => {
         #[repr(C)]
         struct $name<__T> {
-            out: $crate::export::Option<__T>,
+            out: Option<__T>,
         }
 
         impl<__T> $name<__T> {
-            fn new(out: &mut $crate::export::Option<__T>) -> &mut Self {
-                unsafe { &mut *{ out as *mut $crate::export::Option<__T> as *mut $name<__T> } }
+            fn new(out: &mut Option<__T>) -> &mut Self {
+                unsafe { &mut *{ out as *mut Option<__T> as *mut $name<__T> } }
             }
         }
     };

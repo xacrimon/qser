@@ -1,5 +1,4 @@
 use crate::json::Value;
-use crate::lib::Vec;
 
 pub fn safely(value: Value) {
     match value {

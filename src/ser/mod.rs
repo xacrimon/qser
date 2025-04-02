@@ -88,7 +88,7 @@
 
 mod impls;
 
-use crate::lib::{Box, Cow};
+use std::borrow::Cow;
 
 /// One unit of output produced during serialization.
 ///

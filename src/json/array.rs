@@ -1,10 +1,5 @@
-use crate::lib::Vec;
-use crate::lib::iter::FromIterator;
-use crate::lib::mem::ManuallyDrop;
-use crate::lib::ops::{Deref, DerefMut};
-#[cfg(not(feature = "std"))]
-use core::ptr;
-#[cfg(feature = "std")]
+use std::mem::ManuallyDrop;
+use std::ops::{Deref, DerefMut};
 use std::ptr;
 
 use crate::json::{Value, drop};

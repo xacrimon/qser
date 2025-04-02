@@ -1,5 +1,5 @@
-use crate::lib::{Box, Cow, String, Vec};
 use crate::ser::{Fragment, Map, Seq, Serialize};
+use std::borrow::Cow;
 
 /// Serialize any serializable type into a JSON string.
 ///

@@ -148,63 +148,9 @@
     clippy::single_match_else,
     clippy::too_many_lines,
 )]
-#![cfg_attr(not(feature = "std"), no_std)]
-
-#[cfg(not(feature = "std"))]
-extern crate alloc;
-
-/// A facade around all the types we need from the `std`, `core`, and `alloc`
-/// crates. This avoids elaborate import wrangling having to happen in every
-/// module.
-mod lib {
-    mod core {
-        #[cfg(not(feature = "std"))]
-        pub use core::*;
-        #[cfg(feature = "std")]
-        pub use std::*;
-    }
-
-    pub use self::core::clone::Clone;
-
-    pub use self::core::default::Default;
-    pub use self::core::fmt::Debug;
-    pub use self::core::hash::{self};
-
-    pub use self::core::result::{self};
-    pub use self::core::{char, iter, mem, ops, slice, str};
-
-    #[cfg(not(feature = "std"))]
-    pub use alloc::borrow::{Cow, ToOwned};
-    #[cfg(feature = "std")]
-    pub use std::borrow::{Cow, ToOwned};
-
-    #[cfg(not(feature = "std"))]
-    pub use alloc::string::{String, ToString};
-    #[cfg(feature = "std")]
-    pub use std::string::{String, ToString};
-
-    #[cfg(not(feature = "std"))]
-    pub use alloc::vec::Vec;
-    #[cfg(feature = "std")]
-    pub use std::vec::Vec;
-
-    #[cfg(not(feature = "std"))]
-    pub use alloc::boxed::Box;
-    #[cfg(feature = "std")]
-    pub use std::boxed::Box;
-
-    #[cfg(not(feature = "std"))]
-    pub use alloc::collections::{BTreeMap, btree_map};
-    #[cfg(feature = "std")]
-    pub use std::collections::{BTreeMap, btree_map};
-}
 
 #[doc(hidden)]
 pub use qser_derive::{Deserialize, Serialize};
-
-// Not public API.
-#[doc(hidden)]
-pub mod export;
 
 #[macro_use]
 mod careful;

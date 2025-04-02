@@ -1,12 +1,10 @@
-use crate::lib::*;
-
-#[cfg(feature = "std")]
-use std::collections::{HashMap, hash_map};
-#[cfg(feature = "std")]
-use std::hash::{BuildHasher, Hash};
-
 use crate::private;
 use crate::ser::{Fragment, Map, Seq, Serialize};
+use std::borrow::Cow;
+use std::collections::{BTreeMap, HashMap, btree_map, hash_map};
+use std::hash::BuildHasher;
+use std::hash::Hash;
+use std::slice;
 
 impl Serialize for () {
     fn begin(&self) -> Fragment {
@@ -141,7 +139,6 @@ impl<T: Serialize> Serialize for Vec<T> {
     }
 }
 
-#[cfg(feature = "std")]
 impl<K, V, H> Serialize for HashMap<K, V, H>
 where
     K: Hash + Eq + ToString,

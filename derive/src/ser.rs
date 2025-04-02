@@ -46,7 +46,7 @@ fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenStrea
         const #dummy: () = {
             impl #impl_generics qser::Serialize for #ident #ty_generics #bounded_where_clause {
                 fn begin(&self) -> qser::ser::Fragment {
-                    qser::ser::Fragment::Map(qser::export::Box::new(__Map {
+                    qser::ser::Fragment::Map(std::boxed::Box::new(__Map {
                         data: self,
                         state: 0,
                     }))
@@ -55,21 +55,21 @@ fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenStrea
 
             struct __Map #wrapper_impl_generics #where_clause {
                 data: &'__a #ident #ty_generics,
-                state: qser::export::usize,
+                state: usize,
             }
 
             impl #wrapper_impl_generics qser::ser::Map for __Map #wrapper_ty_generics #bounded_where_clause {
-                fn next(&mut self) -> qser::export::Option<(qser::export::Cow<qser::export::str>, &dyn qser::Serialize)> {
+                fn next(&mut self) -> std::option::Option<(std::borrow::Cow<str>, &dyn qser::Serialize)> {
                     let __state = self.state;
                     self.state = __state + 1;
                     match __state {
                         #(
-                            #index => qser::export::Some((
-                                qser::export::Cow::Borrowed(#fieldstr),
+                            #index => std::option::Option::Some((
+                                std::borrow::Cow::Borrowed(#fieldstr),
                                 &self.data.#fieldname,
                             )),
                         )*
-                        _ => qser::export::None,
+                        _ => std::option::Option::None,
                     }
                 }
             }
@@ -116,7 +116,7 @@ fn derive_enum(input: &DeriveInput, enumeration: &DataEnum) -> Result<TokenStrea
                     match self {
                         #(
                             #ident::#var_idents => {
-                                qser::ser::Fragment::Str(qser::export::Cow::Borrowed(#names))
+                                qser::ser::Fragment::Str(std::borrow::Cow::Borrowed(#names))
                             }
                         )*
                     }

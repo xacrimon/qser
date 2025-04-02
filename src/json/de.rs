@@ -1,7 +1,4 @@
-use crate::lib::char;
-use crate::lib::mem;
-use crate::lib::str;
-use crate::lib::{Box, Vec};
+use std::{char, mem, str};
 
 use self::Event::*;
 use crate::de::{Deserialize, Map, Seq, Visitor};

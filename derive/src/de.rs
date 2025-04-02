@@ -46,15 +46,15 @@ pub fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenS
         const #dummy: () = {
             #[repr(C)]
             struct __Visitor #impl_generics #where_clause {
-                __out: qser::export::Option<#ident #ty_generics>,
+                __out: std::option::Option<#ident #ty_generics>,
             }
 
             impl #impl_generics qser::Deserialize for #ident #ty_generics #bounded_where_clause {
-                fn begin(__out: &mut qser::export::Option<Self>) -> &mut dyn qser::de::Visitor {
+                fn begin(__out: &mut std::option::Option<Self>) -> &mut dyn qser::de::Visitor {
                     unsafe {
                         &mut *{
                             __out
-                            as *mut qser::export::Option<Self>
+                            as *mut std::option::Option<Self>
                             as *mut __Visitor #ty_generics
                         }
                     }
@@ -62,8 +62,8 @@ pub fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenS
             }
 
             impl #impl_generics qser::de::Visitor for __Visitor #ty_generics #bounded_where_clause {
-                fn map(&mut self) -> qser::Result<qser::export::Box<dyn qser::de::Map + '_>> {
-                    Ok(qser::export::Box::new(__State {
+                fn map(&mut self) -> qser::Result<std::boxed::Box<dyn qser::de::Map + '_>> {
+                    Ok(std::boxed::Box::new(__State {
                         #(
                             #fieldname: qser::Deserialize::default(),
                         )*
@@ -74,18 +74,18 @@ pub fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenS
 
             struct __State #wrapper_impl_generics #where_clause {
                 #(
-                    #fieldname: qser::export::Option<#fieldty>,
+                    #fieldname: std::option::Option<#fieldty>,
                 )*
-                __out: &'__a mut qser::export::Option<#ident #ty_generics>,
+                __out: &'__a mut std::option::Option<#ident #ty_generics>,
             }
 
             impl #wrapper_impl_generics qser::de::Map for __State #wrapper_ty_generics #bounded_where_clause {
-                fn key(&mut self, __k: &qser::export::str) -> qser::Result<&mut dyn qser::de::Visitor> {
+                fn key(&mut self, __k: &str) -> qser::Result<&mut dyn qser::de::Visitor> {
                     match __k {
                         #(
-                            #fieldstr => qser::export::Ok(qser::Deserialize::begin(&mut self.#fieldname)),
+                            #fieldstr => std::result::Result::Ok(qser::Deserialize::begin(&mut self.#fieldname)),
                         )*
-                        _ => qser::export::Ok(<dyn qser::de::Visitor>::ignore()),
+                        _ => std::result::Result::Ok(<dyn qser::de::Visitor>::ignore()),
                     }
                 }
 
@@ -93,12 +93,12 @@ pub fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenS
                     #(
                         let #fieldname = self.#fieldname.take().ok_or(qser::Error)?;
                     )*
-                    *self.__out = qser::export::Some(#ident {
+                    *self.__out = std::option::Option::Some(#ident {
                         #(
                             #fieldname,
                         )*
                     });
-                    qser::export::Ok(())
+                    std::result::Result::Ok(())
                 }
             }
         };
@@ -141,15 +141,15 @@ pub fn derive_enum(input: &DeriveInput, enumeration: &DataEnum) -> Result<TokenS
         const #dummy: () = {
             #[repr(C)]
             struct __Visitor {
-                __out: qser::export::Option<#ident>,
+                __out: std::option::Option<#ident>,
             }
 
             impl qser::Deserialize for #ident {
-                fn begin(__out: &mut qser::export::Option<Self>) -> &mut dyn qser::de::Visitor {
+                fn begin(__out: &mut std::option::Option<Self>) -> &mut dyn qser::de::Visitor {
                     unsafe {
                         &mut *{
                             __out
-                            as *mut qser::export::Option<Self>
+                            as *mut std::option::Option<Self>
                             as *mut __Visitor
                         }
                     }
@@ -157,13 +157,13 @@ pub fn derive_enum(input: &DeriveInput, enumeration: &DataEnum) -> Result<TokenS
             }
 
             impl qser::de::Visitor for __Visitor {
-                fn string(&mut self, s: &qser::export::str) -> qser::Result<()> {
+                fn string(&mut self, s: &str) -> qser::Result<()> {
                     let value = match s {
                         #( #names => #ident::#var_idents, )*
-                        _ => { return qser::export::Err(qser::Error) },
+                        _ => { return std::option::Result::Err(qser::Error) },
                     };
-                    self.__out = qser::export::Some(value);
-                    qser::export::Ok(())
+                    self.__out = std::option::Option::Some(value);
+                    std::result::Result::Ok(())
                 }
             }
         };
