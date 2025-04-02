@@ -156,7 +156,7 @@ impl Modifier {
 // ----------------------------------------------------------
 
 trait CompositeOpt {
-    fn try_apply_modifier(&mut self, modifiers: &Modifier) -> Result<bool>;
+    fn try_apply_modifier(&mut self, modifier: &Modifier) -> Result<bool>;
 }
 
 trait OptionSet {
@@ -202,8 +202,27 @@ pub enum TagStyle {
 }
 
 impl CompositeOpt for TagStyle {
-    fn try_apply_modifier(&mut self, modifiers: &Modifier) -> Result<bool> {
-        todo!()
+    fn try_apply_modifier(&mut self, modifier: &Modifier) -> Result<bool> {
+        match modifier {
+            Modifier::TagInternal { field } => {
+                *self = TagStyle::Internal {
+                    field: field.clone(),
+                };
+                Ok(true)
+            }
+            Modifier::TagAdjacent { tag, content } => {
+                *self = TagStyle::Adjacent {
+                    tag: tag.clone(),
+                    content: content.clone(),
+                };
+                Ok(true)
+            }
+            Modifier::Untagged => {
+                *self = TagStyle::Untagged;
+                Ok(true)
+            }
+            _ => Ok(false),
+        }
     }
 }
 
@@ -222,8 +241,15 @@ impl Default for DefaultValue {
 }
 
 impl CompositeOpt for DefaultValue {
-    fn try_apply_modifier(&mut self, modifiers: &Modifier) -> Result<bool> {
-        todo!()
+    fn try_apply_modifier(&mut self, modifier: &Modifier) -> Result<bool> {
+        match modifier {
+            Modifier::Default { item } => {
+                self.on = true;
+                self.path = item.clone();
+                Ok(true)
+            }
+            _ => Ok(false),
+        }
     }
 }
 
@@ -244,8 +270,28 @@ impl Default for Skip {
 }
 
 impl CompositeOpt for Skip {
-    fn try_apply_modifier(&mut self, modifiers: &Modifier) -> Result<bool> {
-        todo!()
+    fn try_apply_modifier(&mut self, modifier: &Modifier) -> Result<bool> {
+        match modifier {
+            Modifier::Skip => {
+                self.serializing = true;
+                self.deserializing = true;
+                Ok(true)
+            }
+            Modifier::SkipSerializing => {
+                self.serializing = true;
+                Ok(true)
+            }
+            Modifier::SkipSerializingIf { imp } => {
+                self.serializing = true;
+                self.serializing_if = Some(imp.clone());
+                Ok(true)
+            }
+            Modifier::SkipDeserializing => {
+                self.deserializing = true;
+                Ok(true)
+            }
+            _ => Ok(false),
+        }
     }
 }
 
@@ -266,8 +312,22 @@ impl Default for With {
 }
 
 impl CompositeOpt for With {
-    fn try_apply_modifier(&mut self, modifiers: &Modifier) -> Result<bool> {
-        todo!()
+    fn try_apply_modifier(&mut self, modifier: &Modifier) -> Result<bool> {
+        match modifier {
+            Modifier::With { imp } => {
+                self.module = Some(imp.clone());
+                Ok(true)
+            }
+            Modifier::SerializeWith { imp } => {
+                self.serialize_fn = Some(imp.clone());
+                Ok(true)
+            }
+            Modifier::DeserializeWith { imp } => {
+                self.deserialize_fn = Some(imp.clone());
+                Ok(true)
+            }
+            _ => Ok(false),
+        }
     }
 }
 
@@ -279,7 +339,7 @@ fn bad_modifier(modifier: &Modifier) -> Error {
 
 // ----------------------------------------------------------
 
-struct ContainerOpts {
+pub struct ContainerOpts {
     pub rename: Option<String>,
     pub rename_all: Option<Case>,
     pub tag_style: TagStyle,
@@ -364,7 +424,7 @@ impl OptionSet for ContainerOpts {
 
 // ----------------------------------------------------------
 
-struct VariantOpts {
+pub struct VariantOpts {
     pub rename: Option<String>,
     pub rename_all: Option<Case>,
     pub skip: Skip,
@@ -422,7 +482,7 @@ impl OptionSet for VariantOpts {
 
 // ----------------------------------------------------------
 
-struct FieldOpts {
+pub struct FieldOpts {
     pub rename: Option<String>,
     pub default: DefaultValue,
     pub flatten: bool,
