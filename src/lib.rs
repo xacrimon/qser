@@ -149,7 +149,6 @@
     clippy::too_many_lines,
 )]
 
-#[cfg(feature = "derive")]
 #[doc(hidden)]
 pub use qser_derive::{Deserialize, Serialize};
 

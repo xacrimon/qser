@@ -137,7 +137,41 @@ enum Modifier {
     },
 }
 
-struct ContainerOpts {}
+enum TagStyle {
+    External,
+    Internal { field: String },
+    Adjacent { tag: String, content: String },
+    Untagged,
+}
+
+struct Default {
+    on: bool,
+    path: Option<String>,
+}
+
+struct Skip {
+    serializing: bool,
+    serializing_if: Option<String>,
+    deserializing: bool,
+}
+
+struct With {
+    module: Option<String>,
+    serialize_fn: Option<String>,
+    deserialize_fn: Option<String>,
+}
+
+struct ContainerOpts {
+    rename: Option<String>,
+    rename_all: Option<String>,
+    tag_style: TagStyle,
+    default: Default,
+    remote: Option<String>,
+    transparent: bool,
+    from: Option<String>,
+    try_from: Option<String>,
+    into: Option<String>,
+}
 
 impl TryFrom<Vec<Modifier>> for ContainerOpts {
     type Error = Error;
@@ -147,7 +181,14 @@ impl TryFrom<Vec<Modifier>> for ContainerOpts {
     }
 }
 
-struct VariantOpts {}
+struct VariantOpts {
+    rename: Option<String>,
+    rename_all: Option<String>,
+    skip: Skip,
+    with: With,
+    other: bool,
+    untagged: bool,
+}
 
 impl TryFrom<Vec<Modifier>> for VariantOpts {
     type Error = Error;
@@ -157,7 +198,13 @@ impl TryFrom<Vec<Modifier>> for VariantOpts {
     }
 }
 
-struct FieldOpts {}
+struct FieldOpts {
+    rename: Option<String>,
+    default: Default,
+    flatten: bool,
+    skip: Skip,
+    with: With,
+}
 
 impl TryFrom<Vec<Modifier>> for FieldOpts {
     type Error = Error;

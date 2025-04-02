@@ -3,14 +3,10 @@ name = "qser"
 version = "0.1.0"
 edition = "2024"
 
-[features]
-default = ["derive"]
-derive = ["dep:qser-derive"]
-
 [dependencies]
 itoa = "1.0.15"
 ryu = "1.0.20"
-qser-derive = { path = "./derive", optional = true }
+qser-derive = { path = "./derive" }
 
 [dev-dependencies]
 criterion = "0.5.1"
