@@ -10,3 +10,4 @@ proc-macro = true
 proc-macro2 = "1.0"
 quote = "1.0.40"
 syn = "1.0"
+anyhow = "1.0.97"

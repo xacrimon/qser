@@ -9,6 +9,7 @@ extern crate proc_macro;
 mod attr;
 mod bound;
 mod de;
+mod opts;
 mod ser;
 
 use proc_macro::TokenStream;
