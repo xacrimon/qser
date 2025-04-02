@@ -1,4 +1,4 @@
-use crate::lib::{Box, Cow, String, ToString, Vec};
+use crate::lib::{Box, Cow, String, Vec};
 use crate::ser::{Fragment, Map, Seq, Serialize};
 
 /// Serialize any serializable type into a JSON string.
@@ -54,11 +54,21 @@ fn to_string_impl(value: &dyn Serialize) -> String {
             Fragment::Null => out.push_str("null"),
             Fragment::Bool(b) => out.push_str(if b { "true" } else { "false" }),
             Fragment::Str(s) => escape_str(&s, &mut out),
-            Fragment::U64(n) => out.push_str(n.to_string().as_str()),
-            Fragment::I64(n) => out.push_str(n.to_string().as_str()),
+            Fragment::U64(n) => {
+                let mut buffer = itoa::Buffer::new();
+                let s = buffer.format(n);
+                out.push_str(s)
+            }
+            Fragment::I64(n) => {
+                let mut buffer = itoa::Buffer::new();
+                let s = buffer.format(n);
+                out.push_str(s)
+            }
             Fragment::F64(n) => {
                 if n.is_finite() {
-                    out.push_str(n.to_string().as_str())
+                    let mut buffer = ryu::Buffer::new();
+                    let s = buffer.format(n);
+                    out.push_str(s);
                 } else {
                     out.push_str("null")
                 }
