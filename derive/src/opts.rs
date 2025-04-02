@@ -1,9 +1,11 @@
 use std::default::Default;
+use std::mem;
+use std::str::FromStr;
 
-use anyhow::{Error, Result};
+use anyhow::{Error, Result, anyhow, bail};
 
 // https://serde.rs/attributes.html
-enum Modifier {
+pub enum Modifier {
     // #[serde(rename = "name")]
     Rename {
         serialize_name: Option<String>,
@@ -131,6 +133,9 @@ enum Modifier {
     // #[serde(other)]
     Other,
 
+    // #[serde(flatten)]
+    Flatten,
+
     // #[serde(skip_serializing_if = "path")]
     SkipSerializingIf {
         imp: String,
@@ -142,9 +147,25 @@ enum Modifier {
     },
 }
 
+impl Modifier {
+    fn kind_name(&self) -> String {
+        format!("{:?}", mem::discriminant(self))
+    }
+}
+
 // ----------------------------------------------------------
 
-enum Case {
+trait CompositeOpt {
+    fn try_apply_modifier(&mut self, modifiers: &Modifier) -> Result<bool>;
+}
+
+trait OptionSet {
+    fn apply_modifiers(&mut self, modifiers: &[Modifier]) -> Result<()>;
+}
+
+// ----------------------------------------------------------
+
+pub enum Case {
     Lowercase,
     Uppercase,
     PascalCase,
@@ -155,16 +176,40 @@ enum Case {
     ScreamingKebabCase,
 }
 
-enum TagStyle {
+impl FromStr for Case {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        match s {
+            "lowercase" => Ok(Case::Lowercase),
+            "UPPERCASE" => Ok(Case::Uppercase),
+            "PascalCase" => Ok(Case::PascalCase),
+            "camelCase" => Ok(Case::CamelCase),
+            "snake_case" => Ok(Case::SnakeCase),
+            "SCREAMING_SNAKE_CASE" => Ok(Case::ScreamingSnakeCase),
+            "kebab-case" => Ok(Case::KebabCase),
+            "SCREAMING-KEBAB-CASE" => Ok(Case::ScreamingKebabCase),
+            _ => bail!("invalid case: {}", s),
+        }
+    }
+}
+
+pub enum TagStyle {
     External,
     Internal { field: String },
     Adjacent { tag: String, content: String },
     Untagged,
 }
 
-struct DefaultValue {
-    on: bool,
-    path: Option<String>,
+impl CompositeOpt for TagStyle {
+    fn try_apply_modifier(&mut self, modifiers: &Modifier) -> Result<bool> {
+        todo!()
+    }
+}
+
+pub struct DefaultValue {
+    pub on: bool,
+    pub path: Option<String>,
 }
 
 impl Default for DefaultValue {
@@ -176,10 +221,16 @@ impl Default for DefaultValue {
     }
 }
 
-struct Skip {
-    serializing: bool,
-    serializing_if: Option<String>,
-    deserializing: bool,
+impl CompositeOpt for DefaultValue {
+    fn try_apply_modifier(&mut self, modifiers: &Modifier) -> Result<bool> {
+        todo!()
+    }
+}
+
+pub struct Skip {
+    pub serializing: bool,
+    pub serializing_if: Option<String>,
+    pub deserializing: bool,
 }
 
 impl Default for Skip {
@@ -192,10 +243,16 @@ impl Default for Skip {
     }
 }
 
-struct With {
-    module: Option<String>,
-    serialize_fn: Option<String>,
-    deserialize_fn: Option<String>,
+impl CompositeOpt for Skip {
+    fn try_apply_modifier(&mut self, modifiers: &Modifier) -> Result<bool> {
+        todo!()
+    }
+}
+
+pub struct With {
+    pub module: Option<String>,
+    pub serialize_fn: Option<String>,
+    pub deserialize_fn: Option<String>,
 }
 
 impl Default for With {
@@ -208,24 +265,30 @@ impl Default for With {
     }
 }
 
+impl CompositeOpt for With {
+    fn try_apply_modifier(&mut self, modifiers: &Modifier) -> Result<bool> {
+        todo!()
+    }
+}
+
 // ----------------------------------------------------------
 
-trait OptionSet {
-    fn apply_modifiers(&mut self, modifiers: &[Modifier]) -> Result<()>;
+fn bad_modifier(modifier: &Modifier) -> Error {
+    anyhow!("bad modifier: {:?}", modifier.kind_name())
 }
 
 // ----------------------------------------------------------
 
 struct ContainerOpts {
-    rename: Option<String>,
-    rename_all: Option<Case>,
-    tag_style: TagStyle,
-    default: DefaultValue,
-    remote: Option<String>,
-    transparent: bool,
-    from: Option<String>,
-    try_from: Option<String>,
-    into: Option<String>,
+    pub rename: Option<String>,
+    pub rename_all: Option<Case>,
+    pub tag_style: TagStyle,
+    pub default: DefaultValue,
+    pub remote: Option<String>,
+    pub transparent: bool,
+    pub from: Option<String>,
+    pub try_from: Option<String>,
+    pub into: Option<String>,
 }
 
 impl Default for ContainerOpts {
@@ -246,19 +309,68 @@ impl Default for ContainerOpts {
 
 impl OptionSet for ContainerOpts {
     fn apply_modifiers(&mut self, modifiers: &[Modifier]) -> Result<()> {
-        todo!()
+        for modifier in modifiers {
+            match modifier {
+                Modifier::Rename {
+                    serialize_name,
+                    deserialize_name,
+                } => {
+                    assert_eq!(serialize_name, deserialize_name);
+                    if let Some(name) = serialize_name {
+                        self.rename = Some(name.clone());
+                    }
+                }
+                Modifier::RenameAll {
+                    serialize_case,
+                    deserialize_case,
+                } => {
+                    assert_eq!(serialize_case, deserialize_case);
+                    if let Some(case) = serialize_case {
+                        self.rename_all = Some(Case::from_str(case)?);
+                    }
+                }
+                Modifier::TagInternal { field } => {
+                    self.tag_style = TagStyle::Internal {
+                        field: field.clone(),
+                    };
+                }
+                Modifier::TagAdjacent { tag, content } => {
+                    self.tag_style = TagStyle::Adjacent {
+                        tag: tag.clone(),
+                        content: content.clone(),
+                    };
+                }
+                _ if self.default.try_apply_modifier(modifier)? => {}
+                Modifier::Remote { item } => {
+                    self.remote = Some(item.clone());
+                }
+                Modifier::Transparent => self.transparent = true,
+                Modifier::From { item } => {
+                    self.from = Some(item.clone());
+                }
+                Modifier::TryFrom { item } => {
+                    self.try_from = Some(item.clone());
+                }
+                Modifier::Into { item } => {
+                    self.into = Some(item.clone());
+                }
+                _ => return Err(bad_modifier(modifier)),
+            }
+        }
+
+        Ok(())
     }
 }
 
 // ----------------------------------------------------------
 
 struct VariantOpts {
-    rename: Option<String>,
-    rename_all: Option<Case>,
-    skip: Skip,
-    with: With,
-    other: bool,
-    untagged: bool,
+    pub rename: Option<String>,
+    pub rename_all: Option<Case>,
+    pub skip: Skip,
+    pub with: With,
+    pub other: bool,
+    pub untagged: bool,
 }
 
 impl Default for VariantOpts {
@@ -276,18 +388,46 @@ impl Default for VariantOpts {
 
 impl OptionSet for VariantOpts {
     fn apply_modifiers(&mut self, modifiers: &[Modifier]) -> Result<()> {
-        todo!()
+        for modifier in modifiers {
+            match modifier {
+                Modifier::Rename {
+                    serialize_name,
+                    deserialize_name,
+                } => {
+                    assert_eq!(serialize_name, deserialize_name);
+                    if let Some(name) = serialize_name {
+                        self.rename = Some(name.clone());
+                    }
+                }
+                Modifier::RenameAll {
+                    serialize_case,
+                    deserialize_case,
+                } => {
+                    assert_eq!(serialize_case, deserialize_case);
+                    if let Some(case) = serialize_case {
+                        self.rename_all = Some(Case::from_str(case)?);
+                    }
+                }
+                _ if self.skip.try_apply_modifier(modifier)? => {}
+                _ if self.with.try_apply_modifier(modifier)? => {}
+                Modifier::Other => self.other = true,
+                Modifier::Untagged => self.untagged = true,
+                _ => return Err(bad_modifier(modifier)),
+            }
+        }
+
+        Ok(())
     }
 }
 
 // ----------------------------------------------------------
 
 struct FieldOpts {
-    rename: Option<String>,
-    default: DefaultValue,
-    flatten: bool,
-    skip: Skip,
-    with: With,
+    pub rename: Option<String>,
+    pub default: DefaultValue,
+    pub flatten: bool,
+    pub skip: Skip,
+    pub with: With,
 }
 
 impl Default for FieldOpts {
@@ -304,6 +444,25 @@ impl Default for FieldOpts {
 
 impl OptionSet for FieldOpts {
     fn apply_modifiers(&mut self, modifiers: &[Modifier]) -> Result<()> {
-        todo!()
+        for modifier in modifiers {
+            match modifier {
+                Modifier::Rename {
+                    serialize_name,
+                    deserialize_name,
+                } => {
+                    assert_eq!(serialize_name, deserialize_name);
+                    if let Some(name) = serialize_name {
+                        self.rename = Some(name.clone());
+                    }
+                }
+                _ if self.default.try_apply_modifier(modifier)? => {}
+                Modifier::Flatten => self.flatten = true,
+                _ if self.skip.try_apply_modifier(modifier)? => {}
+                _ if self.with.try_apply_modifier(modifier)? => {}
+                _ => return Err(bad_modifier(modifier)),
+            }
+        }
+
+        Ok(())
     }
 }
