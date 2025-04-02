@@ -42,6 +42,7 @@ pub fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenS
 
     Ok(quote! {
         #[allow(non_upper_case_globals)]
+        #[allow(non_local_definitions)]
         const #dummy: () = {
             #[repr(C)]
             struct __Visitor #impl_generics #where_clause {
@@ -84,7 +85,7 @@ pub fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenS
                         #(
                             #fieldstr => qser::export::Ok(qser::Deserialize::begin(&mut self.#fieldname)),
                         )*
-                        _ => qser::export::Ok(qser::de::Visitor::ignore()),
+                        _ => qser::export::Ok(<dyn qser::de::Visitor>::ignore()),
                     }
                 }
 

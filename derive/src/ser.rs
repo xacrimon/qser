@@ -42,6 +42,7 @@ fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenStrea
 
     Ok(quote! {
         #[allow(non_upper_case_globals)]
+        #[allow(non_local_definitions)]
         const #dummy: () = {
             impl #impl_generics qser::Serialize for #ident #ty_generics #bounded_where_clause {
                 fn begin(&self) -> qser::ser::Fragment {
