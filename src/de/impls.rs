@@ -1,14 +1,14 @@
 #[cfg(feature = "std")]
-use std::collections::HashMap;
-#[cfg(feature = "std")]
 use crate::lib::hash::{BuildHasher, Hash};
 use crate::lib::mem;
 use crate::lib::str::FromStr;
 use crate::lib::*;
+#[cfg(feature = "std")]
+use std::collections::HashMap;
 
+use crate::Place;
 use crate::de::{Deserialize, Map, Seq, Visitor};
 use crate::error::{Error, Result};
-use crate::Place;
 
 impl Deserialize for () {
     fn begin(out: &mut Option<Self>) -> &mut dyn Visitor {

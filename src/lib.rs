@@ -197,9 +197,9 @@ mod lib {
     pub use std::boxed::Box;
 
     #[cfg(not(feature = "std"))]
-    pub use alloc::collections::{btree_map, BTreeMap};
+    pub use alloc::collections::{BTreeMap, btree_map};
     #[cfg(feature = "std")]
-    pub use std::collections::{btree_map, BTreeMap};
+    pub use std::collections::{BTreeMap, btree_map};
 
     #[cfg(feature = "std")]
     pub use std::error;

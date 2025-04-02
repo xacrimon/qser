@@ -1,13 +1,13 @@
+use crate::lib::Vec;
 use crate::lib::iter::FromIterator;
 use crate::lib::mem::ManuallyDrop;
 use crate::lib::ops::{Deref, DerefMut};
-use crate::lib::Vec;
 #[cfg(not(feature = "std"))]
 use core::ptr;
 #[cfg(feature = "std")]
 use std::ptr;
 
-use crate::json::{drop, Value};
+use crate::json::{Value, drop};
 
 /// A `Vec<Value>` with a non-recursive drop impl.
 #[derive(Clone, Debug, Default)]

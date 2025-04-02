@@ -1,8 +1,8 @@
 use proc_macro2::{Span, TokenStream};
 use syn::punctuated::Punctuated;
 use syn::{
-    parse_quote, GenericParam, Generics, Lifetime, LifetimeDef, TypeParamBound, WhereClause,
-    WherePredicate,
+    GenericParam, Generics, Lifetime, LifetimeDef, TypeParamBound, WhereClause, WherePredicate,
+    parse_quote,
 };
 
 pub fn with_lifetime_bound(generics: &Generics, lifetime: &str) -> Generics {

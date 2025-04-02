@@ -1,7 +1,7 @@
 use crate::lib::*;
 
 #[cfg(feature = "std")]
-use std::collections::{hash_map, HashMap};
+use std::collections::{HashMap, hash_map};
 #[cfg(feature = "std")]
 use std::hash::{BuildHasher, Hash};
 
