@@ -159,7 +159,7 @@ trait CompositeOpt {
     fn try_apply_modifier(&mut self, modifier: &Modifier) -> Result<bool>;
 }
 
-trait OptionSet {
+pub trait OptionSet {
     fn apply_modifiers(&mut self, modifiers: &[Modifier]) -> Result<()>;
 }
 

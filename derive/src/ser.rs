@@ -32,7 +32,11 @@ fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenStrea
     let fieldstr = fields
         .named
         .iter()
-        .map(attr::name_of_field)
+        .map(|field| {
+            let opts = attr::attr_field_opts(field)?;
+            let name = attr::name_of_field(field, &opts);
+            Ok(name)
+        })
         .collect::<Result<Vec<_>>>()?;
     let index = 0usize..;
 
@@ -106,7 +110,11 @@ fn derive_enum(input: &DeriveInput, enumeration: &DataEnum) -> Result<TokenStrea
     let names = enumeration
         .variants
         .iter()
-        .map(attr::name_of_variant)
+        .map(|variant| {
+            let opts = attr::attr_variant_opts(variant)?;
+            let name = attr::name_of_variant(variant, &opts);
+            Ok(name)
+        })
         .collect::<Result<Vec<_>>>()?;
 
     Ok(quote! {

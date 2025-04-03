@@ -33,7 +33,11 @@ pub fn derive_struct(input: &DeriveInput, fields: &FieldsNamed) -> Result<TokenS
     let fieldstr = fields
         .named
         .iter()
-        .map(attr::name_of_field)
+        .map(|field| {
+            let opts = attr::attr_field_opts(field)?;
+            let name = attr::name_of_field(field, &opts);
+            Ok(name)
+        })
         .collect::<Result<Vec<_>>>()?;
 
     let wrapper_generics = bound::with_lifetime_bound(&input.generics, "'__a");
@@ -134,7 +138,11 @@ pub fn derive_enum(input: &DeriveInput, enumeration: &DataEnum) -> Result<TokenS
     let names = enumeration
         .variants
         .iter()
-        .map(attr::name_of_variant)
+        .map(|variant| {
+            let opts = attr::attr_variant_opts(variant)?;
+            let name = attr::name_of_variant(variant, &opts);
+            Ok(name)
+        })
         .collect::<Result<Vec<_>>>()?;
 
     Ok(quote! {

@@ -1,13 +1,13 @@
 use proc_macro2::{Span, TokenStream};
 use syn::punctuated::Punctuated;
 use syn::{
-    GenericParam, Generics, Lifetime, LifetimeDef, TypeParamBound, WhereClause, WherePredicate,
+    GenericParam, Generics, Lifetime, LifetimeParam, TypeParamBound, WhereClause, WherePredicate,
     parse_quote,
 };
 
 pub fn with_lifetime_bound(generics: &Generics, lifetime: &str) -> Generics {
     let bound = Lifetime::new(lifetime, Span::call_site());
-    let def = LifetimeDef {
+    let def = LifetimeParam {
         attrs: Vec::new(),
         lifetime: bound.clone(),
         colon_token: None,
