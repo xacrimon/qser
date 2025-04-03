@@ -5,6 +5,12 @@ use syn::{Attribute, Error, Field, ItemEnum, ItemStruct, Lit, LitStr, Meta, Resu
 
 use crate::opts::{ContainerOpts, FieldOpts, Modifier, OptionSet, VariantOpts};
 
+fn parse_lit_mod<T>(meta: ParseNestedMeta, f: impl FnOnce(String) -> T) -> Result<T> {
+    let value = meta.value()?;
+    let data: LitStr = value.parse()?;
+    Ok(f(data.value()))
+}
+
 fn parse_modifier(meta: ParseNestedMeta) -> Result<Modifier> {
     if meta.path.is_ident("rename") {
         let value = meta.value()?;
@@ -41,19 +47,11 @@ fn parse_modifier(meta: ParseNestedMeta) -> Result<Modifier> {
     }
 
     if meta.path.is_ident("tag") {
-        let value = meta.value()?;
-        let name: LitStr = value.parse()?;
-        return Ok(Modifier::Tag {
-            field: name.value(),
-        });
+        return parse_lit_mod(meta, |value| Modifier::Tag { field: value });
     }
 
     if meta.path.is_ident("content") {
-        let value = meta.value()?;
-        let name: LitStr = value.parse()?;
-        return Ok(Modifier::Content {
-            content: name.value(),
-        });
+        return parse_lit_mod(meta, |value| Modifier::Content { content: value });
     }
 
     if meta.path.is_ident("untagged") {
@@ -69,9 +67,7 @@ fn parse_modifier(meta: ParseNestedMeta) -> Result<Modifier> {
     }
 
     if meta.path.is_ident("remote") {
-        return Ok(Modifier::Remote {
-            item: String::new(),
-        });
+        return parse_lit_mod(meta, |value| Modifier::Remote { item: value });
     }
 
     if meta.path.is_ident("transparent") {
@@ -79,33 +75,23 @@ fn parse_modifier(meta: ParseNestedMeta) -> Result<Modifier> {
     }
 
     if meta.path.is_ident("from") {
-        return Ok(Modifier::From {
-            item: String::new(),
-        });
+        return parse_lit_mod(meta, |value| Modifier::From { item: value });
     }
 
     if meta.path.is_ident("try_from") {
-        return Ok(Modifier::TryFrom {
-            item: String::new(),
-        });
+        return parse_lit_mod(meta, |value| Modifier::TryFrom { item: value });
     }
 
     if meta.path.is_ident("into") {
-        return Ok(Modifier::Into {
-            item: String::new(),
-        });
+        return parse_lit_mod(meta, |value| Modifier::Into { item: value });
     }
 
     if meta.path.is_ident("crate") {
-        return Ok(Modifier::Crate {
-            path: String::new(),
-        });
+        return parse_lit_mod(meta, |value| Modifier::Crate { path: value });
     }
 
     if meta.path.is_ident("expecting") {
-        return Ok(Modifier::Expecting {
-            expectation: String::new(),
-        });
+        return parse_lit_mod(meta, |value| Modifier::Expecting { expectation: value });
     }
 
     if meta.path.is_ident("variant_identifier") {
@@ -117,9 +103,7 @@ fn parse_modifier(meta: ParseNestedMeta) -> Result<Modifier> {
     }
 
     if meta.path.is_ident("alias") {
-        return Ok(Modifier::Alias {
-            name: String::new(),
-        });
+        return parse_lit_mod(meta, |value| Modifier::Alias { name: value });
     }
 
     if meta.path.is_ident("skip") {
@@ -135,15 +119,15 @@ fn parse_modifier(meta: ParseNestedMeta) -> Result<Modifier> {
     }
 
     if meta.path.is_ident("serialize_with") {
-        return Ok(Modifier::SerializeWith { imp: String::new() });
+        return parse_lit_mod(meta, |value| Modifier::SerializeWith { imp: value });
     }
 
     if meta.path.is_ident("deserialize_with") {
-        return Ok(Modifier::DeserializeWith { imp: String::new() });
+        return parse_lit_mod(meta, |value| Modifier::DeserializeWith { imp: value });
     }
 
     if meta.path.is_ident("with") {
-        return Ok(Modifier::With { imp: String::new() });
+        return parse_lit_mod(meta, |value| Modifier::With { imp: value });
     }
 
     if meta.path.is_ident("borrow") {
@@ -159,11 +143,11 @@ fn parse_modifier(meta: ParseNestedMeta) -> Result<Modifier> {
     }
 
     if meta.path.is_ident("skip_serializing_if") {
-        return Ok(Modifier::SkipSerializingIf { imp: String::new() });
+        return parse_lit_mod(meta, |value| Modifier::SkipSerializingIf { imp: value });
     }
 
     if meta.path.is_ident("getter") {
-        todo!();
+        return parse_lit_mod(meta, |value| Modifier::Getter { item: value });
     }
 
     Err(Error::new(Span::call_site(), "unsupported attribute"))
