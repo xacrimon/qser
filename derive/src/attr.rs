@@ -17,16 +17,22 @@ fn parse_modifier(meta: ParseNestedMeta) -> Result<Modifier> {
     }
 
     if meta.path.is_ident("rename_all") {
-        return Ok(Modifier::RenameAll {
-            serialize_case: None,
-            deserialize_case: None,
+        let value = meta.value()?;
+        let name: LitStr = value.parse()?;
+
+        return Ok(Modifier::Rename {
+            serialize_name: Some(name.value()),
+            deserialize_name: Some(name.value()),
         });
     }
 
     if meta.path.is_ident("rename_all_fields") {
-        return Ok(Modifier::RenameAllFields {
-            serialize_case: None,
-            deserialize_case: None,
+        let value = meta.value()?;
+        let name: LitStr = value.parse()?;
+
+        return Ok(Modifier::Rename {
+            serialize_name: Some(name.value()),
+            deserialize_name: Some(name.value()),
         });
     }
 
@@ -35,8 +41,19 @@ fn parse_modifier(meta: ParseNestedMeta) -> Result<Modifier> {
     }
 
     if meta.path.is_ident("tag") {
-        //return Ok(Modifier::);
-        todo!()
+        let value = meta.value()?;
+        let name: LitStr = value.parse()?;
+        return Ok(Modifier::Tag {
+            field: name.value(),
+        });
+    }
+
+    if meta.path.is_ident("content") {
+        let value = meta.value()?;
+        let name: LitStr = value.parse()?;
+        return Ok(Modifier::Content {
+            content: name.value(),
+        });
     }
 
     if meta.path.is_ident("untagged") {
@@ -44,10 +61,7 @@ fn parse_modifier(meta: ParseNestedMeta) -> Result<Modifier> {
     }
 
     if meta.path.is_ident("bound") {
-        return Ok(Modifier::Bound {
-            serialize: None,
-            deserialize: None,
-        });
+        todo!();
     }
 
     if meta.path.is_ident("default") {
@@ -149,9 +163,7 @@ fn parse_modifier(meta: ParseNestedMeta) -> Result<Modifier> {
     }
 
     if meta.path.is_ident("getter") {
-        return Ok(Modifier::Getter {
-            item: String::new(),
-        });
+        todo!();
     }
 
     Err(Error::new(Span::call_site(), "unsupported attribute"))

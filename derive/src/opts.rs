@@ -28,13 +28,12 @@ pub enum Modifier {
     DenyUnknownFields,
 
     // #[serde(tag = "type")]
-    TagInternal {
+    Tag {
         field: String,
     },
 
     // #[serde(tag = "t", content = "c")]
-    TagAdjacent {
-        tag: String,
+    Content {
         content: String,
     },
 
@@ -204,15 +203,18 @@ pub enum TagStyle {
 impl CompositeOpt for TagStyle {
     fn try_apply_modifier(&mut self, modifier: &Modifier) -> Result<bool> {
         match modifier {
-            Modifier::TagInternal { field } => {
+            Modifier::Tag { field } => {
                 *self = TagStyle::Internal {
                     field: field.clone(),
                 };
                 Ok(true)
             }
-            Modifier::TagAdjacent { tag, content } => {
+            Modifier::Content { content } => {
+                let TagStyle::Internal { field } = self else {
+                    todo!()
+                };
                 *self = TagStyle::Adjacent {
-                    tag: tag.clone(),
+                    tag: field.clone(),
                     content: content.clone(),
                 };
                 Ok(true)
@@ -389,17 +391,7 @@ impl OptionSet for ContainerOpts {
                         self.rename_all = Some(Case::from_str(case)?);
                     }
                 }
-                Modifier::TagInternal { field } => {
-                    self.tag_style = TagStyle::Internal {
-                        field: field.clone(),
-                    };
-                }
-                Modifier::TagAdjacent { tag, content } => {
-                    self.tag_style = TagStyle::Adjacent {
-                        tag: tag.clone(),
-                        content: content.clone(),
-                    };
-                }
+                _ if self.tag_style.try_apply_modifier(modifier)? => {}
                 _ if self.default.try_apply_modifier(modifier)? => {}
                 Modifier::Remote { item } => {
                     self.remote = Some(item.clone());
